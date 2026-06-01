@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+@theme {
+  /* Backgrounds */
+  --color-page: #F0F0F0;
+  --color-sidebar: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-insight: #EDE9F8;
+
+  /* Text */
+  --color-primary: #1A1A1A;
+  --color-secondary: #6B6B6B;
+  --color-muted: #9CA3AF;
+  --color-on-dark: #FFFFFF;
+
+  /* Accents */
+  --color-teal: #00C9B1;
+  --color-teal-end: #7EDCCC;
+  --color-link: #5B8DEF;
+  --color-nav-active: #1A1A1A;
+
+  /* Borders & status */
+  --color-border: #E5E7EB;
+  --color-unread: #EF4444;
+  --color-done: #00C9B1;
+  --color-purple: #C4B5FD;
+
+  /* Chart */
+  --color-chart-area: #F5C6D8;
+  --color-chart-line: #8B9CF4;
+
+  /* Timeline icons */
+  --color-t-pink: #F472B6;
+  --color-t-green: #34D399;
+  --color-t-blue: #60A5FA;
+  --color-t-yellow: #FBBF24;
+
+  /* Shadows */
+  --shadow-card: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-sidebar: 1px 0 0 #E5E7EB;
+  --shadow-dropdown: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+/* ── Dark mode token overrides ───────────────────────────────────────────────
+   Toggled by adding .dark to <html>. All Tailwind utility classes that
+   reference these CSS custom properties automatically pick up dark values.  */
+.dark {
+  /* Backgrounds — layered from deepest to lightest */
+  --color-page:    #0F0F1A;
+  --color-sidebar: #141428;
+  --color-card:    #1C1C2E;
+  --color-insight: #23233E;
+
+  /* Text */
+  --color-primary:   #E8E6F2;
+  --color-secondary: #9896B2;
+  --color-muted:     #56547A;
+  --color-on-dark:   #FFFFFF;
+
+  /* Accents */
+  --color-teal:     #00C9B1;
+  --color-teal-end: #7EDCCC;
+  --color-link:     #7BA8F5;
+  --color-nav-active: #23233E;
+
+  /* Borders & status */
+  --color-border: #2A2A42;
+  --color-unread: #F87171;
+  --color-done:   #00C9B1;
+  --color-purple: #A695F5;
+
+  /* Chart */
+  --color-chart-area: rgba(139,156,244,0.22);
+  --color-chart-line: #8B9CF4;
+
+  /* Timeline icons — keep vibrant on dark */
+  --color-t-pink:   #F472B6;
+  --color-t-green:  #34D399;
+  --color-t-blue:   #60A5FA;
+  --color-t-yellow: #FBBF24;
+
+  /* Shadows — deeper for dark surfaces */
+  --shadow-card:     0 2px 8px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-sidebar:  1px 0 0 #2A2A42;
+  --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.55);
+}
+
+/* ── Global smooth theme transition ─────────────────────────────────────────
+   Applied to all elements; Tailwind's transition-* classes override this
+   on interactive elements so hover animations stay snappy.               */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+}
+
+/* ── Breathing exercise animation ───────────────────────────────────────────── */
+@keyframes breathe {
+  0% {
+    transform: scale(0.6);
+    animation-timing-function: ease-in-out;
+  }
+  33.33% {
+    transform: scale(1);
+    animation-timing-function: linear;
+  }
+  66.66% {
+    transform: scale(1);
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    transform: scale(0.6);
+  }
+}
+
+@keyframes breatheRing {
+  0%    { transform: scale(0.7);  opacity: 0.6; animation-timing-function: ease-in-out; }
+  33.33%{ transform: scale(1.08); opacity: 1;   animation-timing-function: linear; }
+  66.66%{ transform: scale(1.08); opacity: 1;   animation-timing-function: ease-in-out; }
+  100%  { transform: scale(0.7);  opacity: 0.6; }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.breathe-circle {
+  animation: breathe 12s linear infinite;
+}
+
+.breathe-ring {
+  animation: breatheRing 12s linear infinite;
+}
+
+.breathe-label {
+  animation: fadeInScale 0.45s ease-out both;
+}
