@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../../context/ThemeContext'
 
 // ── Chart geometry constants ──────────────────────────────────────────────────
@@ -127,6 +128,7 @@ function Dropdown({ value, onChange }) {
 export default function MentalStability() {
   const [timeframe, setTimeframe] = useState('weekly')
   const { isDark }                = useTheme()
+  const navigate                  = useNavigate()
 
   const data                       = TIMEFRAMES[timeframe]
   const { line, area, xPositions } = buildPaths(data.values)
@@ -192,9 +194,13 @@ export default function MentalStability() {
             </p>
           </div>
         </div>
-        <a href="#" className="text-xs text-link font-medium whitespace-nowrap flex-shrink-0">
-          View Analytics →
-        </a>
+        <button
+          type="button"
+          onClick={() => navigate('/insights')}
+          className="text-xs text-link font-medium whitespace-nowrap flex-shrink-0 hover:opacity-70 transition-opacity"
+        >
+          View Insights →
+        </button>
       </div>
     </div>
   )

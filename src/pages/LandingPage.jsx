@@ -104,13 +104,6 @@ function Navbar({ onGetStarted }) {
               {label}
             </a>
           ))}
-          <a
-            href="#"
-            onClick={e => { e.preventDefault(); onGetStarted() }}
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
-          >
-            Login
-          </a>
         </div>
 
         <button
@@ -507,7 +500,7 @@ export default function LandingPage() {
   const navigate = useNavigate()
 
   function goToDashboard() {
-    navigate('/dashboard')
+    navigate('/onboarding')
   }
 
   return (
