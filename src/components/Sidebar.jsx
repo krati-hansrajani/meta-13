@@ -38,6 +38,16 @@ const MessagesIcon = () => (
   </svg>
 )
 
+const JournalIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    <line x1="9" y1="7" x2="15" y2="7"/>
+    <line x1="9" y1="11" x2="15" y2="11"/>
+    <line x1="9" y1="15" x2="13" y2="15"/>
+  </svg>
+)
+
 const SettingsIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3"/>
@@ -56,6 +66,7 @@ const LogOutIcon = () => (
 const NAV_ITEMS = [
   { id: 'dashboard',         label: 'Dashboard',        icon: <DashboardIcon />,        to: '/dashboard' },
   { id: 'wellness-timeline', label: 'Wellness Timeline', icon: <WellnessTimelineIcon />, to: '/wellness' },
+  { id: 'journal',           label: 'Journal',           icon: <JournalIcon />,          to: '/journal' },
   { id: 'community',         label: 'Community',         icon: <CommunityIcon />,        to: '/community' },
   { id: 'my-groups',         label: 'My Groups',         icon: <MyGroupsIcon />,         to: '/my-groups' },
   { id: 'messages',          label: 'Messages',          icon: <MessagesIcon />,         to: '/messages' },

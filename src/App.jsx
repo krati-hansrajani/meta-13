@@ -10,6 +10,7 @@ import MyGroups from './pages/MyGroups'
 import LandingPage from './pages/LandingPage'
 import Onboarding from './pages/Onboarding'
 import Insights from './pages/Insights'
+import Journal from './pages/Journal'
 
 function AppWithLayout() {
   return (
@@ -18,6 +19,7 @@ function AppWithLayout() {
         <Route path="/dashboard"     element={<Dashboard />}     />
         <Route path="/insights"      element={<Insights />}      />
         <Route path="/wellness"      element={<Wellness />}      />
+        <Route path="/journal"       element={<Journal />}       />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/community"     element={<Community />}     />
         <Route path="/my-groups"     element={<MyGroups />}     />
