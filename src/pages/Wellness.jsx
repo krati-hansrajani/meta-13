@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 
 // ── Static data ───────────────────────────────────────────────────────────────
 
-const TABS = ['All Goals', 'Upcomming', 'In-Progress', 'Achieved']
+const TABS = ['All Goals', 'Upcoming', 'In-Progress', 'Achieved']
 
 const INITIAL_GOALS = [
   {
@@ -11,7 +11,7 @@ const INITIAL_GOALS = [
     description: 'Commit to 10 minutes of mindfulness each morning',
     date: 'Apr 21, 2026',
     time: '9:41 PM',
-    status: 'Upcomming',
+    status: 'Upcoming',
     circleColor: '#C4B5FD',
   },
   {
@@ -43,23 +43,56 @@ const INITIAL_GOALS = [
   },
 ]
 
-// Cycle through these colors for newly added goals
 const CIRCLE_COLORS = ['#C4B5FD', '#60A5FA', '#34D399', '#FBBF24']
 
 const BADGE_STYLES = {
-  Upcomming:     { color: '#00C9B1' },
+  Upcoming:      { color: '#00C9B1' },
   Achieved:      { color: '#34D399' },
   'In-Progress': { color: '#FBBF24' },
 }
 
+const STATUS_OPTIONS = ['Upcoming', 'In-Progress', 'Achieved']
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatDateDisplay(isoDate) {
-  // "2026-04-21" → "Apr 21, 2026"  (local-date constructor avoids UTC shift)
   const [y, m, d] = isoDate.split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
   })
+}
+
+function displayDateToIso(displayDate) {
+  const months = { Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12 }
+  try {
+    const parts = displayDate.replace(',', '').split(' ')
+    const [mon, day, year] = parts
+    return `${year}-${String(months[mon]).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+  } catch {
+    return ''
+  }
+}
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
+function CloseIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="18" y1="6"  x2="6"  y2="18" />
+      <line x1="6"  y1="6"  x2="18" y2="18" />
+    </svg>
+  )
+}
+
+function MoreVertIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="5"  r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
+    </svg>
+  )
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -99,22 +132,84 @@ function GoalCircle({ circleColor, isLast }) {
   )
 }
 
-function CloseIcon() {
+// ── Goal Options Menu ─────────────────────────────────────────────────────────
+
+function GoalOptionsMenu({ goal, onStatusChange, onEdit }) {
+  const [open, setOpen] = useState(false)
+  const ref             = useRef(null)
+
+  useEffect(() => {
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <line x1="18" y1="6"  x2="6"  y2="18" />
-      <line x1="6"  y1="6"  x2="18" y2="18" />
-    </svg>
+    <div className="relative flex-shrink-0" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="p-1.5 rounded-lg text-muted hover:text-primary hover:bg-page transition-colors"
+      >
+        <MoreVertIcon />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 bg-card border border-border rounded-xl z-20 overflow-hidden"
+          style={{ boxShadow: 'var(--shadow-dropdown)', minWidth: '168px' }}
+        >
+          <div className="py-1">
+            <p className="px-3 py-1.5 text-[10px] font-semibold text-muted uppercase tracking-wide">
+              Change Status
+            </p>
+            {STATUS_OPTIONS.filter(s => s !== goal.status).map(status => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => { onStatusChange(goal.id, status); setOpen(false) }}
+                className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-page transition-colors flex items-center gap-2"
+              >
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: BADGE_STYLES[status]?.color ?? '#9CA3AF' }}
+                />
+                Mark as {status}
+              </button>
+            ))}
+          </div>
+          <div className="border-t border-border py-1">
+            <button
+              type="button"
+              onClick={() => { onEdit(goal); setOpen(false) }}
+              className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-page transition-colors flex items-center gap-2"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Edit Goal
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
-// ── Add Goal Modal ────────────────────────────────────────────────────────────
+// ── Goal Modal (Add & Edit) ───────────────────────────────────────────────────
 
-function AddGoalModal({ onAdd, onClose }) {
-  const [title,       setTitle]       = useState('')
-  const [description, setDescription] = useState('')
-  const [targetDate,  setTargetDate]  = useState('')
+function GoalModal({ initialGoal, onSave, onClose }) {
+  const isEdit = Boolean(initialGoal)
+
+  const [title,       setTitle]       = useState(initialGoal?.title       ?? '')
+  const [description, setDescription] = useState(initialGoal?.description ?? '')
+  const [targetDate,  setTargetDate]  = useState(
+    initialGoal?.date ? displayDateToIso(initialGoal.date) : ''
+  )
   const titleRef = useRef(null)
 
   useEffect(() => { titleRef.current?.focus() }, [])
@@ -131,7 +226,7 @@ function AddGoalModal({ onAdd, onClose }) {
     if (!trimmedTitle) return
 
     const now = new Date()
-    onAdd({
+    onSave({
       title:       trimmedTitle,
       description: description.trim(),
       date:        targetDate
@@ -155,9 +250,8 @@ function AddGoalModal({ onAdd, onClose }) {
         style={{ maxWidth: '480px', margin: '0 16px', boxShadow: '0 8px 40px rgba(0,0,0,0.18)' }}
         onMouseDown={e => e.stopPropagation()}
       >
-        {/* Modal header */}
         <div className="flex items-center justify-between px-8 pt-7 pb-5 border-b border-border">
-          <h3 className="text-lg font-bold text-primary">Add New Goal</h3>
+          <h3 className="text-lg font-bold text-primary">{isEdit ? 'Edit Goal' : 'Add New Goal'}</h3>
           <button
             type="button"
             onClick={onClose}
@@ -167,10 +261,8 @@ function AddGoalModal({ onAdd, onClose }) {
           </button>
         </div>
 
-        {/* Form body */}
         <form onSubmit={handleSubmit} className="px-8 py-6 flex flex-col gap-5">
 
-          {/* Goal Title */}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-primary">
               Goal Title <span className="text-unread">*</span>
@@ -185,7 +277,6 @@ function AddGoalModal({ onAdd, onClose }) {
             />
           </div>
 
-          {/* Description */}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-primary">Description</label>
             <textarea
@@ -197,7 +288,6 @@ function AddGoalModal({ onAdd, onClose }) {
             />
           </div>
 
-          {/* Target Date */}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-primary">Target Date</label>
             <input
@@ -208,16 +298,16 @@ function AddGoalModal({ onAdd, onClose }) {
             />
           </div>
 
-          {/* Status notice */}
-          <p className="text-xs text-secondary flex items-center gap-1.5">
-            <span
-              className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-              style={{ backgroundColor: '#00C9B1' }}
-            />
-            New goals are added as <span className="font-medium text-primary">Upcomming</span> by default.
-          </p>
+          {!isEdit && (
+            <p className="text-xs text-secondary flex items-center gap-1.5">
+              <span
+                className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                style={{ backgroundColor: '#00C9B1' }}
+              />
+              New goals are added as <span className="font-medium text-primary">Upcoming</span> by default.
+            </p>
+          )}
 
-          {/* Action buttons */}
           <div className="flex items-center justify-end gap-3 pt-1">
             <button
               type="button"
@@ -231,7 +321,7 @@ function AddGoalModal({ onAdd, onClose }) {
               disabled={!isValid}
               className="text-sm font-semibold px-5 py-2.5 rounded-xl bg-[#1A1A1A] text-white hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Add New Goal
+              {isEdit ? 'Save Changes' : 'Add New Goal'}
             </button>
           </div>
         </form>
@@ -243,17 +333,41 @@ function AddGoalModal({ onAdd, onClose }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function Wellness() {
-  const [goals,     setGoals]     = useState(INITIAL_GOALS)
-  const [activeTab, setActiveTab] = useState('All Goals')
-  const [showModal, setShowModal] = useState(false)
-  const nextId                    = useRef(INITIAL_GOALS.length + 1)
+  const [goals,       setGoals]       = useState(INITIAL_GOALS)
+  const [activeTab,   setActiveTab]   = useState('All Goals')
+  const [showModal,   setShowModal]   = useState(false)
+  const [editingGoal, setEditingGoal] = useState(null)
+  const nextId                        = useRef(INITIAL_GOALS.length + 1)
 
   function addGoal({ title, description, date, time }) {
     const circleColor = CIRCLE_COLORS[goals.length % CIRCLE_COLORS.length]
     setGoals(prev => [
       ...prev,
-      { id: nextId.current++, title, description, date, time, status: 'Upcomming', circleColor },
+      { id: nextId.current++, title, description, date, time, status: 'Upcoming', circleColor },
     ])
+  }
+
+  function handleStatusChange(goalId, newStatus) {
+    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, status: newStatus } : g))
+  }
+
+  function handleEditOpen(goal) {
+    setEditingGoal(goal)
+    setShowModal(true)
+  }
+
+  function handleModalClose() {
+    setShowModal(false)
+    setEditingGoal(null)
+  }
+
+  function handleModalSave(data) {
+    if (editingGoal) {
+      setGoals(prev => prev.map(g => g.id === editingGoal.id ? { ...g, ...data } : g))
+    } else {
+      addGoal(data)
+    }
+    handleModalClose()
   }
 
   const filtered =
@@ -265,7 +379,6 @@ export default function Wellness() {
     <>
       <div className="flex flex-col gap-6 pt-2">
 
-        {/* Page header */}
         <header className="flex items-center justify-between py-6 flex-shrink-0">
           <div>
             <h1 className="text-3xl font-bold text-primary leading-tight">
@@ -278,14 +391,13 @@ export default function Wellness() {
 
           <button
             type="button"
-            onClick={() => setShowModal(true)}
+            onClick={() => { setEditingGoal(null); setShowModal(true) }}
             className="bg-[#1A1A1A] text-white text-sm font-semibold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity cursor-pointer flex-shrink-0"
           >
             + Add New Goal
           </button>
         </header>
 
-        {/* Main card */}
         <div className="bg-card rounded-2xl shadow-card">
 
           {/* Tab bar */}
@@ -324,7 +436,7 @@ export default function Wellness() {
                     <div key={goal.id} className="flex gap-6">
                       <GoalCircle circleColor={goal.circleColor} isLast={isLast} />
                       <div
-                        className={`flex-1 flex items-start justify-between gap-8 min-w-0 ${
+                        className={`flex-1 flex items-start justify-between gap-4 min-w-0 ${
                           isLast ? 'pb-4' : 'pb-14'
                         }`}
                       >
@@ -341,7 +453,14 @@ export default function Wellness() {
                             {goal.time}
                           </p>
                         </div>
-                        <StatusBadge status={goal.status} />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <StatusBadge status={goal.status} />
+                          <GoalOptionsMenu
+                            goal={goal}
+                            onStatusChange={handleStatusChange}
+                            onEdit={handleEditOpen}
+                          />
+                        </div>
                       </div>
                     </div>
                   )
@@ -353,9 +472,10 @@ export default function Wellness() {
       </div>
 
       {showModal && (
-        <AddGoalModal
-          onAdd={addGoal}
-          onClose={() => setShowModal(false)}
+        <GoalModal
+          initialGoal={editingGoal}
+          onSave={handleModalSave}
+          onClose={handleModalClose}
         />
       )}
     </>

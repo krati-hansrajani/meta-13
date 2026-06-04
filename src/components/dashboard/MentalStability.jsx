@@ -133,6 +133,9 @@ export default function MentalStability() {
   const data                       = TIMEFRAMES[timeframe]
   const { line, area, xPositions } = buildPaths(data.values)
 
+  const currentScore = Math.round(data.values[data.values.length - 1] * 100)
+  const change       = Math.round((data.values[data.values.length - 1] - data.values[0]) * 100)
+
   // Chart colors adapt to dark mode
   const gridColor  = isDark ? '#2A2A42' : '#E5E7EB'
   const axisColor  = isDark ? '#56547A' : '#9CA3AF'
@@ -148,6 +151,24 @@ export default function MentalStability() {
       </div>
 
       <p className="text-xs text-secondary mb-3">{data.subtitle}</p>
+
+      {/* Score row */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-baseline gap-1">
+          <span className="text-2xl font-bold text-primary">{currentScore}</span>
+          <span className="text-sm text-muted">/100</span>
+        </div>
+        <span
+          className="text-xs font-semibold px-2 py-0.5 rounded-full"
+          style={{
+            color:           change >= 0 ? '#34D399' : '#EF4444',
+            backgroundColor: change >= 0 ? 'rgba(52,211,153,0.12)' : 'rgba(239,68,68,0.10)',
+          }}
+        >
+          {change >= 0 ? '↑' : '↓'} {Math.abs(change)} pts
+        </span>
+        <span className="text-xs text-muted">vs start of {data.label.toLowerCase()} period</span>
+      </div>
 
       <svg viewBox="0 0 520 175" width="100%" aria-hidden="true">
         <defs>

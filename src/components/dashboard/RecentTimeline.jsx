@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+
 const EVENTS = [
   { id: 1, label: 'Mental stability improved', date: 'Apr 20, 2025', color: 'var(--color-t-pink)' },
   { id: 2, label: 'You had a chat with your companion', date: 'Apr 21, 2025', color: 'var(--color-t-green)' },
@@ -7,11 +9,19 @@ const EVENTS = [
 ]
 
 export default function RecentTimeline() {
+  const navigate = useNavigate()
+
   return (
     <div className="bg-card rounded-2xl p-6 shadow-card">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base font-semibold text-primary">Recent Timeline</h2>
-        <a href="#" className="text-xs text-link font-medium">View All</a>
+        <button
+          type="button"
+          onClick={() => navigate('/wellness')}
+          className="text-xs text-link font-medium hover:opacity-70 transition-opacity"
+        >
+          View All
+        </button>
       </div>
 
       <ul className="flex flex-col gap-3">
