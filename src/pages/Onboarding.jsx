@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const TOTAL = 8
+const TOTAL = 7
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -102,46 +102,10 @@ function styledInput(extraProps = {}) {
   }
 }
 
-// ── Step 1 — Welcome + Name ───────────────────────────────────────────────────
+// ── Step 1 — Create Username ──────────────────────────────────────────────────
 
 function Step1({ a, update, onNext }) {
-  return (
-    <div className="flex flex-col gap-6">
-      <StepEmoji emoji="💜" />
-
-      <div className="text-center">
-        <h2 className="text-[22px] font-bold text-gray-900 mb-2">Welcome to Meta-Xi</h2>
-        <p className="text-sm text-gray-500 leading-relaxed max-w-[280px] mx-auto">
-          Let's personalise your wellness journey. This will only take a few minutes.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-gray-700">What should we call you?</label>
-        <input
-          type="text"
-          value={a.name}
-          onChange={e => update('name', e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && a.name.trim()) onNext() }}
-          placeholder="Your name"
-          autoFocus
-          {...styledInput()}
-        />
-      </div>
-
-      <PrimaryBtn onClick={onNext} disabled={!a.name.trim()} />
-    </div>
-  )
-}
-
-// ── Step 2 — Create Username ──────────────────────────────────────────────────
-
-function Step2({ a, update, onNext }) {
   const [error, setError] = useState('')
-
-  const suggested = a.name.trim()
-    ? a.name.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 18) + '_xi'
-    : ''
 
   function validate() {
     const val = a.username.trim()
@@ -157,17 +121,17 @@ function Step2({ a, update, onNext }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <StepEmoji emoji="✏️" />
+      <StepEmoji emoji="💜" />
 
       <div className="text-center">
-        <h2 className="text-[22px] font-bold text-gray-900 mb-2">Create your username</h2>
+        <h2 className="text-[22px] font-bold text-gray-900 mb-2">Welcome to Meta-Xi</h2>
         <p className="text-sm text-gray-500 leading-relaxed max-w-[280px] mx-auto">
-          This is how others in the community will find and recognise you.
+          Let's start by creating your username — this is how others in the community will find you.
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-gray-700">Username</label>
+        <label className="text-sm font-medium text-gray-700">Choose a username</label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm select-none">@</span>
           <input
@@ -184,24 +148,6 @@ function Step2({ a, update, onNext }) {
         {error && <p className="text-xs" style={{ color: '#EF4444' }}>{error}</p>}
         <p className="text-xs text-gray-400">Letters, numbers, and underscores · 3–20 characters</p>
       </div>
-
-      {suggested && !a.username && (
-        <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-2"
-             style={{ backgroundColor: '#EDE9F8' }}>
-          <div>
-            <p className="text-xs font-medium" style={{ color: '#5B48D9' }}>Suggested</p>
-            <p className="text-sm font-semibold" style={{ color: '#5B48D9' }}>@{suggested}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => { update('username', suggested); setError('') }}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-            style={{ backgroundColor: '#8B9CF4', color: '#fff' }}
-          >
-            Use this
-          </button>
-        </div>
-      )}
 
       <PrimaryBtn onClick={handleNext} disabled={!a.username.trim()} />
     </div>
@@ -556,7 +502,6 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const [step, setStep]       = useState(1)
   const [answers, setAnswers] = useState({
-    name:           '',
     username:       '',
     feelings:       [],
     journal:        '',
@@ -593,7 +538,6 @@ export default function Onboarding() {
 
   const stepContent = [
     <Step1 key="s1" a={answers} update={update} onNext={next} />,
-    <Step2 key="s2" a={answers} update={update} onNext={next} />,
     <Step3 key="s3" a={answers} toggle={toggle} onNext={next} />,
     <Step4 key="s4" a={answers} update={update} onNext={next} />,
     <Step5 key="s5" a={answers} toggle={toggle} onNext={next} />,

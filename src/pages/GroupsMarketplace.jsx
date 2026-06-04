@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -12,71 +12,80 @@ const ALL_ACTIVITY = ['Very Active', 'Active', 'Moderate', 'Low']
 const ALL_FOCUS    = ['Support', 'Learning', 'Practice', 'Social']
 const ALL_SIZES    = ['Small (<50)', 'Medium (50–200)', 'Large (200+)']
 
+const SUGGESTED_TOPICS = ['Meditation', 'Anxiety', 'Sleep', 'Mindfulness']
+
 const GROUPS = [
   {
     id: 1,  name: 'Meditation Beginners', initials: 'MB', iconColor: '#C4B5FD',
-    members: 234, activity: 'Active',    focus: 'Learning',  size: 'Medium (50–200)',
+    members: 234, activity: 'Active',     focus: 'Learning', size: 'Medium (50–200)',
     topics: ['Meditation', 'Mindfulness'],
     description: 'Starting your meditation journey? Join us for daily guided practices and peer support.',
     memberPreviews: [{ initials: 'SJ', color: '#F9A8D4' }, { initials: 'MC', color: '#86EFAC' }, { initials: 'EW', color: '#93C5FD' }],
   },
   {
-    id: 2,  name: 'Anxiety Warriors',     initials: 'AW', iconColor: '#F9A8D4',
+    id: 2,  name: 'Anxiety Warriors',      initials: 'AW', iconColor: '#F9A8D4',
     members: 567, activity: 'Very Active', focus: 'Support',  size: 'Large (200+)',
     topics: ['Anxiety', 'Stress', 'Breathwork'],
     description: 'A safe space to share experiences and effective coping strategies for anxiety.',
     memberPreviews: [{ initials: 'LP', color: '#F9A8D4' }, { initials: 'JR', color: '#86EFAC' }, { initials: 'NP', color: '#FCD34D' }],
   },
   {
-    id: 3,  name: 'Sleep Better Together',initials: 'SB', iconColor: '#93C5FD',
-    members: 188, activity: 'Moderate',   focus: 'Support',   size: 'Medium (50–200)',
+    id: 3,  name: 'Sleep Better Together', initials: 'SB', iconColor: '#93C5FD',
+    members: 188, activity: 'Moderate',   focus: 'Support',  size: 'Medium (50–200)',
     topics: ['Sleep', 'Mindfulness'],
     description: 'Share tips and mutual support for improving sleep quality and bedtime routines.',
     memberPreviews: [{ initials: 'AK', color: '#C4B5FD' }, { initials: 'TB', color: '#6EE7B7' }, { initials: 'MW', color: '#FCA5A5' }],
   },
   {
-    id: 4,  name: 'Mindful Mornings',     initials: 'MM', iconColor: '#6EE7B7',
-    members: 312, activity: 'Active',    focus: 'Practice',  size: 'Medium (50–200)',
+    id: 4,  name: 'Mindful Mornings',      initials: 'MM', iconColor: '#6EE7B7',
+    members: 312, activity: 'Active',     focus: 'Practice', size: 'Medium (50–200)',
     topics: ['Meditation', 'Yoga', 'Journaling'],
     description: 'Start your day with intention. Daily morning routines and mindful check-ins.',
     memberPreviews: [{ initials: 'RC', color: '#FCD34D' }, { initials: 'PL', color: '#93C5FD' }, { initials: 'VN', color: '#F9A8D4' }],
   },
   {
-    id: 5,  name: 'Stress-Free Zone',     initials: 'SZ', iconColor: '#FCD34D',
+    id: 5,  name: 'Stress-Free Zone',      initials: 'SZ', iconColor: '#FCD34D',
     members: 445, activity: 'Very Active', focus: 'Support',  size: 'Large (200+)',
     topics: ['Stress', 'Mindfulness', 'Breathwork'],
     description: 'Practical strategies and peer support for managing stress at work and home.',
     memberPreviews: [{ initials: 'DG', color: '#86EFAC' }, { initials: 'KM', color: '#C4B5FD' }, { initials: 'BO', color: '#FDBA74' }],
   },
   {
-    id: 6,  name: 'Journal Club',          initials: 'JC', iconColor: '#FCA5A5',
-    members: 89,  activity: 'Moderate',   focus: 'Practice',  size: 'Small (<50)',
+    id: 6,  name: 'Journal Club',           initials: 'JC', iconColor: '#FCA5A5',
+    members: 89,  activity: 'Moderate',   focus: 'Practice', size: 'Small (<50)',
     topics: ['Journaling', 'Therapy'],
     description: 'Weekly prompts and group reflections to help you process thoughts and grow.',
     memberPreviews: [{ initials: 'HS', color: '#F9A8D4' }, { initials: 'LR', color: '#6EE7B7' }, { initials: 'TP', color: '#93C5FD' }],
   },
   {
-    id: 7,  name: 'Depression Recovery',  initials: 'DR', iconColor: '#86EFAC',
+    id: 7,  name: 'Depression Recovery',   initials: 'DR', iconColor: '#86EFAC',
     members: 678, activity: 'Very Active', focus: 'Support',  size: 'Large (200+)',
     topics: ['Depression', 'Therapy', 'Mindfulness'],
     description: 'Compassionate community for people navigating depression and building hope.',
     memberPreviews: [{ initials: 'CM', color: '#FCA5A5' }, { initials: 'JW', color: '#C4B5FD' }, { initials: 'AN', color: '#FCD34D' }],
   },
   {
-    id: 8,  name: 'Breathwork Collective', initials: 'BC', iconColor: '#FDBA74',
-    members: 143, activity: 'Active',     focus: 'Practice',  size: 'Medium (50–200)',
+    id: 8,  name: 'Breathwork Collective',  initials: 'BC', iconColor: '#FDBA74',
+    members: 143, activity: 'Active',     focus: 'Practice', size: 'Medium (50–200)',
     topics: ['Breathwork', 'Anxiety', 'Stress'],
     description: 'Explore pranayama, box breathing, and other breathwork techniques together.',
     memberPreviews: [{ initials: 'SR', color: '#86EFAC' }, { initials: 'EL', color: '#F9A8D4' }, { initials: 'GN', color: '#C4B5FD' }],
   },
   {
-    id: 9,  name: 'Yoga & Wellness',       initials: 'YW', iconColor: '#A7F3D0',
-    members: 256, activity: 'Active',     focus: 'Social',    size: 'Medium (50–200)',
+    id: 9,  name: 'Yoga & Wellness',        initials: 'YW', iconColor: '#A7F3D0',
+    members: 256, activity: 'Active',     focus: 'Social',   size: 'Medium (50–200)',
     topics: ['Yoga', 'Mindfulness', 'Meditation'],
     description: 'Connect over yoga flows, body positivity, and holistic wellness practices.',
     memberPreviews: [{ initials: 'PN', color: '#FCD34D' }, { initials: 'SD', color: '#93C5FD' }, { initials: 'MH', color: '#FDBA74' }],
   },
 ]
+
+const ACTIVITY_STYLE = {
+  'Very Active': { bg: '#D1FAE5', color: '#10B981' },
+  Active:        { bg: '#DBEAFE', color: '#3B82F6' },
+  Moderate:      { bg: '#FEF3C7', color: '#D97706' },
+  Low:           { bg: '#F3F4F6', color: '#6B7280' },
+}
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -100,7 +109,25 @@ function UsersIcon() {
   )
 }
 
-// ── Shared filter primitives ──────────────────────────────────────────────────
+function ChevronDownIcon({ open }) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+         style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}>
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  )
+}
+
+function MiniCheckIcon() {
+  return (
+    <svg width="8" height="8" viewBox="0 0 12 12" fill="none">
+      <polyline points="2 6.5 5 9.5 10 3" stroke="white" strokeWidth="2.2"
+                strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+// ── Filter primitives ─────────────────────────────────────────────────────────
 
 function FilterSection({ title, children }) {
   return (
@@ -111,12 +138,12 @@ function FilterSection({ title, children }) {
   )
 }
 
-function ChipBtn({ label, active, onClick, fullWidth = false }) {
+function ChipBtn({ label, active, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`text-xs font-medium rounded-lg px-2.5 py-1.5 transition-colors text-left ${fullWidth ? 'w-full' : ''}`}
+      className="text-xs font-medium rounded-lg px-2.5 py-1.5 transition-colors text-left"
       style={{
         backgroundColor: active ? '#EDE9F8' : 'var(--color-page)',
         color:           active ? '#5B48D9' : 'var(--color-secondary)',
@@ -128,21 +155,103 @@ function ChipBtn({ label, active, onClick, fullWidth = false }) {
   )
 }
 
-// ── Group card ────────────────────────────────────────────────────────────────
+function FilterDropdown({ label, options, selected, onToggle, suggested }) {
+  const [open,   setOpen]   = useState(false)
+  const [search, setSearch] = useState('')
+  const ref                 = useRef(null)
 
-const ACTIVITY_STYLE = {
-  'Very Active': { bg: '#D1FAE5', color: '#10B981' },
-  Active:        { bg: '#DBEAFE', color: '#3B82F6' },
-  Moderate:      { bg: '#FEF3C7', color: '#D97706' },
-  Low:           { bg: '#F3F4F6', color: '#6B7280' },
+  useEffect(() => {
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const visible   = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
+  const count     = selected.length
+  const hasActive = count > 0
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="relative" ref={ref}>
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+          style={{
+            border:          `1.5px solid ${hasActive ? '#8B9CF4' : 'var(--color-border)'}`,
+            backgroundColor: hasActive ? '#EDE9F8' : 'var(--color-page)',
+            color:           hasActive ? '#5B48D9' : 'var(--color-secondary)',
+          }}
+        >
+          <span>{hasActive ? `${label} (${count})` : label}</span>
+          <ChevronDownIcon open={open} />
+        </button>
+
+        {open && (
+          <div
+            className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl z-30 overflow-hidden"
+            style={{ boxShadow: 'var(--shadow-dropdown)' }}
+          >
+            <div className="px-3 pt-2 pb-1.5 border-b border-border">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search…"
+                autoFocus
+                className="w-full text-xs outline-none bg-transparent placeholder:text-muted text-primary"
+              />
+            </div>
+            <div className="max-h-44 overflow-y-auto py-1">
+              {visible.length === 0 ? (
+                <p className="text-xs text-muted px-3 py-2">No results</p>
+              ) : visible.map(opt => {
+                const on = selected.includes(opt)
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => onToggle(opt)}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-page transition-colors flex items-center gap-2"
+                    style={{ color: on ? '#5B48D9' : 'var(--color-primary)' }}
+                  >
+                    <span
+                      className="w-3.5 h-3.5 rounded flex items-center justify-center flex-shrink-0"
+                      style={{
+                        border:          `1.5px solid ${on ? '#8B9CF4' : 'var(--color-border)'}`,
+                        backgroundColor: on ? '#8B9CF4' : 'transparent',
+                      }}
+                    >
+                      {on && <MiniCheckIcon />}
+                    </span>
+                    {opt}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Suggested quick-picks */}
+      <div className="flex flex-wrap gap-1.5">
+        {suggested.map(s => (
+          <ChipBtn key={s} label={s} active={selected.includes(s)} onClick={() => onToggle(s)} />
+        ))}
+      </div>
+    </div>
+  )
 }
+
+// ── Group card ────────────────────────────────────────────────────────────────
 
 function GroupCard({ group }) {
   const as = ACTIVITY_STYLE[group.activity] ?? { bg: '#F3F4F6', color: '#6B7280' }
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-4">
-      {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <div
@@ -167,10 +276,8 @@ function GroupCard({ group }) {
         </span>
       </div>
 
-      {/* Description */}
       <p className="text-xs text-secondary leading-relaxed">{group.description}</p>
 
-      {/* Topics */}
       <div>
         <p className="text-xs font-semibold text-link mb-2">Topics</p>
         <div className="flex flex-wrap gap-1.5">
@@ -180,7 +287,6 @@ function GroupCard({ group }) {
         </div>
       </div>
 
-      {/* Member preview */}
       <div>
         <p className="text-xs font-semibold text-link mb-2">Members</p>
         <div className="flex items-center gap-1.5">
@@ -197,9 +303,7 @@ function GroupCard({ group }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-auto">
-        <span className="text-[10px] text-muted">{group.focus} · {group.size}</span>
-      </div>
+      <span className="text-[10px] text-muted mt-auto">{group.focus} · {group.size}</span>
 
       <button
         type="button"
@@ -242,17 +346,17 @@ export default function GroupsMarketplace() {
   return (
     <div className="flex flex-col gap-6 pt-2">
 
-      {/* Header */}
-      <header className="flex items-center gap-4 py-6 flex-shrink-0">
+      {/* Header — back button on its own line, heading below */}
+      <header className="flex flex-col gap-1 py-6 flex-shrink-0">
         <button
           type="button"
           onClick={() => navigate('/community')}
-          className="flex items-center gap-1.5 text-sm font-medium text-secondary hover:text-primary transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 text-sm font-medium text-secondary hover:text-primary transition-colors self-start"
         >
           <BackIcon />
           Back
         </button>
-        <div>
+        <div className="mt-2">
           <h1 className="text-3xl font-bold text-primary leading-tight">Explore Groups</h1>
           <p className="text-sm text-secondary mt-1">Discover communities that match your wellness journey</p>
         </div>
@@ -264,7 +368,7 @@ export default function GroupsMarketplace() {
         {/* Filter sidebar */}
         <aside
           className="flex-shrink-0 bg-card rounded-2xl shadow-card p-5 flex flex-col gap-5 sticky top-0 overflow-y-auto"
-          style={{ width: '220px', maxHeight: 'calc(100vh - 120px)' }}
+          style={{ width: '230px', maxHeight: 'calc(100vh - 120px)' }}
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-primary">Filters</h2>
@@ -276,17 +380,19 @@ export default function GroupsMarketplace() {
           </div>
 
           <FilterSection title="Topics">
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_TOPICS.map(t => (
-                <ChipBtn key={t} label={t} active={selTopics.includes(t)} onClick={() => toggleTopic(t)} />
-              ))}
-            </div>
+            <FilterDropdown
+              label="Select topics"
+              options={ALL_TOPICS}
+              selected={selTopics}
+              onToggle={toggleTopic}
+              suggested={SUGGESTED_TOPICS}
+            />
           </FilterSection>
 
           <FilterSection title="Activity Level">
             <div className="flex flex-col gap-1.5">
               {ALL_ACTIVITY.map(a => (
-                <ChipBtn key={a} label={a} active={selActivity === a} onClick={() => setSelActivity(p => p === a ? '' : a)} fullWidth />
+                <ChipBtn key={a} label={a} active={selActivity === a} onClick={() => setSelActivity(p => p === a ? '' : a)} />
               ))}
             </div>
           </FilterSection>
@@ -294,7 +400,7 @@ export default function GroupsMarketplace() {
           <FilterSection title="Community Focus">
             <div className="flex flex-col gap-1.5">
               {ALL_FOCUS.map(f => (
-                <ChipBtn key={f} label={f} active={selFocus === f} onClick={() => setSelFocus(p => p === f ? '' : f)} fullWidth />
+                <ChipBtn key={f} label={f} active={selFocus === f} onClick={() => setSelFocus(p => p === f ? '' : f)} />
               ))}
             </div>
           </FilterSection>
@@ -302,7 +408,7 @@ export default function GroupsMarketplace() {
           <FilterSection title="Group Size">
             <div className="flex flex-col gap-1.5">
               {ALL_SIZES.map(s => (
-                <ChipBtn key={s} label={s} active={selSize === s} onClick={() => setSelSize(p => p === s ? '' : s)} fullWidth />
+                <ChipBtn key={s} label={s} active={selSize === s} onClick={() => setSelSize(p => p === s ? '' : s)} />
               ))}
             </div>
           </FilterSection>
@@ -317,11 +423,7 @@ export default function GroupsMarketplace() {
           {filtered.length === 0 ? (
             <div className="bg-card rounded-2xl shadow-card p-12 text-center">
               <p className="text-sm text-secondary">No groups match your current filters.</p>
-              <button
-                type="button"
-                onClick={clearAll}
-                className="text-xs text-link mt-2 hover:opacity-70 transition-opacity"
-              >
+              <button type="button" onClick={clearAll} className="text-xs text-link mt-2 hover:opacity-70 transition-opacity">
                 Clear all filters
               </button>
             </div>
