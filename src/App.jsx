@@ -11,6 +11,8 @@ import LandingPage from './pages/LandingPage'
 import Onboarding from './pages/Onboarding'
 import Insights from './pages/Insights'
 import Journal from './pages/Journal'
+import PeopleMarketplace from './pages/PeopleMarketplace'
+import GroupsMarketplace from './pages/GroupsMarketplace'
 
 function AppWithLayout() {
   return (
@@ -25,6 +27,8 @@ function AppWithLayout() {
         <Route path="/my-groups"     element={<MyGroups />}     />
         <Route path="/messages"      element={<Messages />}      />
         <Route path="/settings"      element={<Settings />}      />
+        <Route path="/explore-people" element={<PeopleMarketplace />} />
+        <Route path="/explore-groups" element={<GroupsMarketplace />} />
       </Routes>
     </Layout>
   )

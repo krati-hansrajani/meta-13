@@ -451,7 +451,7 @@ function FriendsTab() {
           {DISCOVER_PEOPLE.map(p => <PersonCard key={p.id} person={p}/>)}
         </div>
         <div className="flex justify-center pt-1">
-          <button type="button" className="text-sm text-secondary hover:text-primary transition-colors font-medium">
+          <button type="button" onClick={() => navigate('/explore-people')} className="text-sm text-secondary hover:text-primary transition-colors font-medium">
             Explore more people →
           </button>
         </div>
@@ -463,6 +463,7 @@ function FriendsTab() {
 // ── Groups tab ────────────────────────────────────────────────────────────────
 
 function GroupsTab() {
+  const navigate                                = useNavigate()
   const [search, setSearch]                     = useState('')
   const [innerTab, setInnerTab]                 = useState('groups')
   const [sentGroupRequests, setSentGroupRequests] = useState(SENT_GROUP_REQUESTS)
@@ -529,7 +530,7 @@ function GroupsTab() {
           {DISCOVER_GROUPS.map(g => <GroupCard key={g.id} group={g}/>)}
         </div>
         <div className="flex justify-center pt-1">
-          <button type="button" className="text-sm text-secondary hover:text-primary transition-colors font-medium">
+          <button type="button" onClick={() => navigate('/explore-groups')} className="text-sm text-secondary hover:text-primary transition-colors font-medium">
             Explore more groups →
           </button>
         </div>

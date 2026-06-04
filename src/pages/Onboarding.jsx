@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const TOTAL = 6
+const TOTAL = 8
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -31,6 +31,23 @@ const TIMES = [
 
 const AGE_RANGES = ['Under 18', '18–24', '25–34', '35–44', '45–54', '55+']
 const GENDERS    = ['Male', 'Female', 'Non-binary', 'Prefer not to say']
+
+const DEGREES = [
+  'High School', 'Some College', "Associate's", "Bachelor's",
+  "Master's", 'PhD / Doctoral', 'Trade / Vocational', 'Prefer not to say',
+]
+
+const PASSIONS = [
+  'Photography', 'Music', 'Writing', 'Reading', 'Hiking',
+  'Cooking', 'Art', 'Gaming', 'Fitness', 'Travel',
+  'Yoga', 'Meditation', 'Dancing', 'Gardening', 'Volunteering',
+]
+
+const COMMUNITY_ROLES = [
+  { id: 'mentor',   label: 'Mentor',        desc: 'I can guide and support others',  emoji: '🎓' },
+  { id: 'mentee',   label: 'Mentee',        desc: 'I want to learn and grow',         emoji: '🌱' },
+  { id: 'both',     label: 'Both',          desc: "I'm open to mentoring and learning",emoji: '🤝' },
+]
 
 // ── Shared UI pieces ──────────────────────────────────────────────────────────
 
@@ -75,6 +92,16 @@ function PrimaryBtn({ onClick, disabled = false, label = 'Continue', accent = fa
   )
 }
 
+function styledInput(extraProps = {}) {
+  return {
+    className: 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none bg-white',
+    style: { transition: 'border-color 0.15s, box-shadow 0.15s' },
+    onFocus: e => { e.target.style.borderColor = '#8B9CF4'; e.target.style.boxShadow = '0 0 0 3px rgba(139,156,244,0.18)' },
+    onBlur:  e => { e.target.style.borderColor = '#E5E7EB'; e.target.style.boxShadow = 'none' },
+    ...extraProps,
+  }
+}
+
 // ── Step 1 — Welcome + Name ───────────────────────────────────────────────────
 
 function Step1({ a, update, onNext }) {
@@ -98,16 +125,7 @@ function Step1({ a, update, onNext }) {
           onKeyDown={e => { if (e.key === 'Enter' && a.name.trim()) onNext() }}
           placeholder="Your name"
           autoFocus
-          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none bg-white"
-          style={{ transition: 'border-color 0.15s, box-shadow 0.15s' }}
-          onFocus={e => {
-            e.target.style.borderColor = '#8B9CF4'
-            e.target.style.boxShadow = '0 0 0 3px rgba(139,156,244,0.18)'
-          }}
-          onBlur={e => {
-            e.target.style.borderColor = '#E5E7EB'
-            e.target.style.boxShadow = 'none'
-          }}
+          {...styledInput()}
         />
       </div>
 
@@ -116,9 +134,83 @@ function Step1({ a, update, onNext }) {
   )
 }
 
-// ── Step 2 — Current Feeling ──────────────────────────────────────────────────
+// ── Step 2 — Create Username ──────────────────────────────────────────────────
 
-function Step2({ a, toggle, onNext }) {
+function Step2({ a, update, onNext }) {
+  const [error, setError] = useState('')
+
+  const suggested = a.name.trim()
+    ? a.name.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 18) + '_xi'
+    : ''
+
+  function validate() {
+    const val = a.username.trim()
+    if (val.length < 3) { setError('Username must be at least 3 characters.'); return false }
+    if (val.length > 20) { setError('Username can be 20 characters max.'); return false }
+    if (!/^[a-zA-Z0-9_]+$/.test(val)) { setError('Only letters, numbers, and underscores.'); return false }
+    return true
+  }
+
+  function handleNext() {
+    if (validate()) onNext()
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <StepEmoji emoji="✏️" />
+
+      <div className="text-center">
+        <h2 className="text-[22px] font-bold text-gray-900 mb-2">Create your username</h2>
+        <p className="text-sm text-gray-500 leading-relaxed max-w-[280px] mx-auto">
+          This is how others in the community will find and recognise you.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-medium text-gray-700">Username</label>
+        <div className="relative">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm select-none">@</span>
+          <input
+            type="text"
+            value={a.username}
+            onChange={e => { update('username', e.target.value.replace(/\s/g, '_')); setError('') }}
+            onKeyDown={e => { if (e.key === 'Enter') handleNext() }}
+            placeholder="your_username"
+            maxLength={20}
+            autoFocus
+            {...styledInput({ className: 'w-full border border-gray-200 rounded-xl pl-8 pr-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none bg-white' })}
+          />
+        </div>
+        {error && <p className="text-xs" style={{ color: '#EF4444' }}>{error}</p>}
+        <p className="text-xs text-gray-400">Letters, numbers, and underscores · 3–20 characters</p>
+      </div>
+
+      {suggested && !a.username && (
+        <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-2"
+             style={{ backgroundColor: '#EDE9F8' }}>
+          <div>
+            <p className="text-xs font-medium" style={{ color: '#5B48D9' }}>Suggested</p>
+            <p className="text-sm font-semibold" style={{ color: '#5B48D9' }}>@{suggested}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => { update('username', suggested); setError('') }}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+            style={{ backgroundColor: '#8B9CF4', color: '#fff' }}
+          >
+            Use this
+          </button>
+        </div>
+      )}
+
+      <PrimaryBtn onClick={handleNext} disabled={!a.username.trim()} />
+    </div>
+  )
+}
+
+// ── Step 3 — Current Feeling ──────────────────────────────────────────────────
+
+function Step3({ a, toggle, onNext }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
@@ -156,9 +248,9 @@ function Step2({ a, toggle, onNext }) {
   )
 }
 
-// ── Step 3 — Journal ──────────────────────────────────────────────────────────
+// ── Step 4 — Journal ──────────────────────────────────────────────────────────
 
-function Step3({ a, update, onNext }) {
+function Step4({ a, update, onNext }) {
   return (
     <div className="flex flex-col gap-5">
       <div className="text-center">
@@ -171,20 +263,10 @@ function Step3({ a, update, onNext }) {
         onChange={e => update('journal', e.target.value)}
         placeholder="Write freely… there is no right or wrong answer…"
         rows={5}
-        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none resize-none leading-relaxed bg-white"
-        style={{ transition: 'border-color 0.15s, box-shadow 0.15s' }}
-        onFocus={e => {
-          e.target.style.borderColor = '#8B9CF4'
-          e.target.style.boxShadow = '0 0 0 3px rgba(139,156,244,0.18)'
-        }}
-        onBlur={e => {
-          e.target.style.borderColor = '#E5E7EB'
-          e.target.style.boxShadow = 'none'
-        }}
+        {...styledInput({ className: 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none resize-none leading-relaxed bg-white' })}
       />
 
-      <div className="rounded-xl px-4 py-3 flex items-start gap-2.5"
-           style={{ backgroundColor: '#EDE9F8' }}>
+      <div className="rounded-xl px-4 py-3 flex items-start gap-2.5" style={{ backgroundColor: '#EDE9F8' }}>
         <span className="text-base leading-none mt-0.5">💡</span>
         <p className="text-xs leading-relaxed" style={{ color: '#6B5CE7' }}>
           Tip: Journaling can help you process emotions and gain clarity about your feelings.
@@ -196,9 +278,9 @@ function Step3({ a, update, onNext }) {
   )
 }
 
-// ── Step 4 — Help Options ─────────────────────────────────────────────────────
+// ── Step 5 — Help Options ─────────────────────────────────────────────────────
 
-function Step4({ a, toggle, onNext }) {
+function Step5({ a, toggle, onNext }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
@@ -244,9 +326,9 @@ function Step4({ a, toggle, onNext }) {
   )
 }
 
-// ── Step 5 — Check-in Reminder ────────────────────────────────────────────────
+// ── Step 6 — Check-in Reminder ────────────────────────────────────────────────
 
-function Step5({ a, update, onNext }) {
+function Step6({ a, update, onNext }) {
   return (
     <div className="flex flex-col gap-6">
       <StepEmoji emoji="🔔" />
@@ -277,24 +359,17 @@ function Step5({ a, update, onNext }) {
         </div>
       </div>
 
-      {/* Reminder toggle row */}
       <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-gray-50 border border-gray-200">
         <span className="text-sm text-gray-700 select-none">Send me daily reminders</span>
         <button
           type="button"
           onClick={() => update('dailyReminders', !a.dailyReminders)}
           className="relative w-11 h-6 rounded-full flex-shrink-0"
-          style={{
-            backgroundColor: a.dailyReminders ? '#8B9CF4' : '#D1D5DB',
-            transition: 'background-color 0.2s',
-          }}
+          style={{ backgroundColor: a.dailyReminders ? '#8B9CF4' : '#D1D5DB', transition: 'background-color 0.2s' }}
         >
           <span
             className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow"
-            style={{
-              left: a.dailyReminders ? '22px' : '2px',
-              transition: 'left 0.2s',
-            }}
+            style={{ left: a.dailyReminders ? '22px' : '2px', transition: 'left 0.2s' }}
           />
         </button>
       </div>
@@ -304,35 +379,9 @@ function Step5({ a, update, onNext }) {
   )
 }
 
-// ── Step 6 — Demographics ─────────────────────────────────────────────────────
+// ── Step 7 — Demographics ─────────────────────────────────────────────────────
 
-function Step6({ a, update, onNext }) {
-  function ChipGrid({ items, selected, onSelect, cols = 2 }) {
-    return (
-      <div className={`grid grid-cols-${cols} gap-2`}>
-        {items.map(item => {
-          const on = selected === item
-          return (
-            <button
-              key={item}
-              type="button"
-              onClick={() => onSelect(item)}
-              className="py-2.5 px-3 rounded-xl text-sm font-medium text-center"
-              style={{
-                border:          `2px solid ${on ? '#8B9CF4' : '#E5E7EB'}`,
-                backgroundColor: on ? '#EDE9F8' : '#F9FAFB',
-                color:           on ? '#5B48D9' : '#374151',
-                transition: 'border-color 0.15s, background-color 0.15s, color 0.15s',
-              }}
-            >
-              {item}
-            </button>
-          )
-        })}
-      </div>
-    )
-  }
-
+function Step7({ a, update, onNext }) {
   return (
     <div className="flex flex-col gap-6">
       <StepEmoji emoji="✨" />
@@ -350,10 +399,7 @@ function Step6({ a, update, onNext }) {
           {AGE_RANGES.map(age => {
             const on = a.ageRange === age
             return (
-              <button
-                key={age}
-                type="button"
-                onClick={() => update('ageRange', age)}
+              <button key={age} type="button" onClick={() => update('ageRange', age)}
                 className="py-2.5 rounded-xl text-sm font-medium"
                 style={{
                   border:          `2px solid ${on ? '#8B9CF4' : '#E5E7EB'}`,
@@ -375,10 +421,7 @@ function Step6({ a, update, onNext }) {
           {GENDERS.map(g => {
             const on = a.gender === g
             return (
-              <button
-                key={g}
-                type="button"
-                onClick={() => update('gender', g)}
+              <button key={g} type="button" onClick={() => update('gender', g)}
                 className="py-2.5 px-3 rounded-xl text-sm font-medium"
                 style={{
                   border:          `2px solid ${on ? '#8B9CF4' : '#E5E7EB'}`,
@@ -388,6 +431,110 @@ function Step6({ a, update, onNext }) {
                 }}
               >
                 {g}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <PrimaryBtn onClick={onNext} />
+    </div>
+  )
+}
+
+// ── Step 8 — Background & Community Role ─────────────────────────────────────
+
+function Step8({ a, update, toggle, onNext }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <StepEmoji emoji="🌟" />
+
+      <div className="text-center">
+        <h2 className="text-[22px] font-bold text-gray-900 mb-2">Your background &amp; passions</h2>
+        <p className="text-sm text-gray-500 leading-relaxed max-w-[280px] mx-auto">
+          Help us match you with the right people and groups.
+        </p>
+      </div>
+
+      {/* Degree */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Highest Education</label>
+        <div className="relative">
+          <select
+            value={a.degree}
+            onChange={e => update('degree', e.target.value)}
+            className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none bg-white cursor-pointer"
+            style={{ transition: 'border-color 0.15s' }}
+          >
+            <option value="">Select your degree…</option>
+            {DEGREES.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <svg className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"
+               width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Passions / Hobbies */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Passions &amp; Hobbies</label>
+        <p className="text-xs text-gray-400 -mt-1">Select all that apply</p>
+        <div className="flex flex-wrap gap-2">
+          {PASSIONS.map(p => {
+            const on = a.passions.includes(p)
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => toggle('passions', p)}
+                className="px-3 py-1.5 rounded-xl text-sm font-medium"
+                style={{
+                  border:          `2px solid ${on ? '#8B9CF4' : '#E5E7EB'}`,
+                  backgroundColor: on ? '#EDE9F8' : '#F9FAFB',
+                  color:           on ? '#5B48D9' : '#374151',
+                  transition: 'border-color 0.15s, background-color 0.15s, color 0.15s',
+                }}
+              >
+                {p}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Community Role */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Community Role</label>
+        <div className="flex flex-col gap-2">
+          {COMMUNITY_ROLES.map(r => {
+            const on = a.communityRole === r.id
+            return (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => update('communityRole', r.id)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-left"
+                style={{
+                  border:          `2px solid ${on ? '#8B9CF4' : '#E5E7EB'}`,
+                  backgroundColor: on ? '#EDE9F8' : '#F9FAFB',
+                  transition: 'border-color 0.15s, background-color 0.15s',
+                }}
+              >
+                <span className="text-xl leading-none">{r.emoji}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: on ? '#5B48D9' : '#374151' }}>
+                    {r.label}
+                  </p>
+                  <p className="text-xs" style={{ color: on ? '#6B5CE7' : '#9CA3AF' }}>{r.desc}</p>
+                </div>
+                {on && (
+                  <div className="ml-auto w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                       style={{ backgroundColor: '#8B9CF4' }}>
+                    <CheckIcon />
+                  </div>
+                )}
               </button>
             )
           })}
@@ -410,6 +557,7 @@ export default function Onboarding() {
   const [step, setStep]       = useState(1)
   const [answers, setAnswers] = useState({
     name:           '',
+    username:       '',
     feelings:       [],
     journal:        '',
     helpWith:       [],
@@ -417,6 +565,9 @@ export default function Onboarding() {
     dailyReminders: true,
     ageRange:       '',
     gender:         '',
+    degree:         '',
+    passions:       [],
+    communityRole:  '',
   })
 
   function update(key, value) {
@@ -442,21 +593,22 @@ export default function Onboarding() {
 
   const stepContent = [
     <Step1 key="s1" a={answers} update={update} onNext={next} />,
-    <Step2 key="s2" a={answers} toggle={toggle} onNext={next} />,
-    <Step3 key="s3" a={answers} update={update} onNext={next} />,
-    <Step4 key="s4" a={answers} toggle={toggle} onNext={next} />,
-    <Step5 key="s5" a={answers} update={update} onNext={next} />,
+    <Step2 key="s2" a={answers} update={update} onNext={next} />,
+    <Step3 key="s3" a={answers} toggle={toggle} onNext={next} />,
+    <Step4 key="s4" a={answers} update={update} onNext={next} />,
+    <Step5 key="s5" a={answers} toggle={toggle} onNext={next} />,
     <Step6 key="s6" a={answers} update={update} onNext={next} />,
+    <Step7 key="s7" a={answers} update={update} onNext={next} />,
+    <Step8 key="s8" a={answers} update={update} toggle={toggle} onNext={next} />,
   ]
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F8F7FF' }}>
 
-      {/* ── Top header ─────────────────────────────────────────────────────── */}
+      {/* Top header */}
       <div className="flex-shrink-0 px-5 pt-6">
         <div className="max-w-lg mx-auto">
 
-          {/* Back | Title | Spacer */}
           <div className="flex items-center gap-2 mb-1">
             <button
               type="button"
@@ -473,16 +625,13 @@ export default function Onboarding() {
               <p className="text-[11px] text-gray-400 mt-0.5">Take a moment for yourself</p>
             </div>
 
-            {/* Balance spacer */}
             <div style={{ width: 52 }} />
           </div>
 
-          {/* Step counter */}
           <p className="text-[11px] text-gray-400 text-center mb-3">
             Step {step} of {TOTAL}
           </p>
 
-          {/* Segmented progress bar */}
           <div className="flex gap-1.5 mb-8">
             {Array.from({ length: TOTAL }, (_, i) => (
               <div
@@ -498,7 +647,7 @@ export default function Onboarding() {
         </div>
       </div>
 
-      {/* ── Step card ──────────────────────────────────────────────────────── */}
+      {/* Step card */}
       <div className="flex-1 flex items-start justify-center px-4 pb-12">
         <div
           key={step}
