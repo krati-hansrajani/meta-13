@@ -3,6 +3,7 @@ import FeelingAnxious from '../components/dashboard/FeelingAnxious'
 import ActionItems from '../components/dashboard/ActionItems'
 import RecentTimeline from '../components/dashboard/RecentTimeline'
 import RecentChats from '../components/dashboard/RecentChats'
+import WellnessScore from '../components/dashboard/WellnessScore'
 import PageHeader from '../components/PageHeader'
 
 export default function Dashboard() {
@@ -18,6 +19,9 @@ export default function Dashboard() {
           <ActionItems />
         </div>
       </div>
+
+      {/* Middle row: Wellness Score (journal feeling data) */}
+      <WellnessScore />
 
       {/* Bottom row: Recent Timeline + Recent Chats */}
       <div className="grid grid-cols-2 gap-6">

@@ -56,6 +56,18 @@ const DISCOVER_GROUPS = [
   { id: 6, name: 'Stress-Free Zone',      initials: 'SZ', iconColor: '#FCD34D', members: 445, description: 'Practical strategies and peer support for managing stress at work and home.' },
 ]
 
+const RECOMMENDED_PEOPLE = [
+  { id: 20, name: 'Priya Sharma',  initials: 'PS', avatarColor: '#FCD34D', mutualConnects: 6, interests: ['Meditation', 'Journaling'],         goal: 'Finding inner peace' },
+  { id: 21, name: 'Leon Brooks',   initials: 'LB', avatarColor: '#F9A8D4', mutualConnects: 3, interests: ['Yoga', 'Reading', 'Breathing'],      goal: 'Managing stress daily' },
+  { id: 22, name: 'Nadia Osei',    initials: 'NO', avatarColor: '#6EE7B7', mutualConnects: 8, interests: ['Running', 'Mindfulness', 'Art'],     goal: 'Building healthy routines' },
+]
+
+const RECOMMENDED_GROUPS = [
+  { id: 7, name: 'Gratitude Circle',  initials: 'GC', iconColor: '#FCD34D', members: 271, description: 'Daily gratitude practices and positive affirmations for a healthier mindset.' },
+  { id: 8, name: 'Burnout Recovery',  initials: 'BR', iconColor: '#F9A8D4', members: 394, description: 'Recover from burnout with community support, rest strategies and gentle habits.' },
+  { id: 9, name: 'Calm & Focused',    initials: 'CF', iconColor: '#86EFAC', members: 158, description: 'Techniques for staying calm, improving focus and managing overwhelm at work.' },
+]
+
 const ROLE_ORDER = { Admin: 0, Teacher: 1, Student: 2 }
 const ROLE_STYLE = {
   Admin:   { bg: '#FEE2E2', color: '#EF4444' },
@@ -456,6 +468,19 @@ function FriendsTab() {
           </button>
         </div>
       </section>
+
+      <section className="bg-card rounded-2xl shadow-card p-6 flex flex-col gap-5">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold text-primary">Recommended for You</h2>
+          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: '#EDE9F8', color: '#8B9CF4' }}>
+            Suggested
+          </span>
+        </div>
+        <p className="text-xs text-muted -mt-2">Based on your interests and wellness goals</p>
+        <div className="grid grid-cols-3 gap-4">
+          {RECOMMENDED_PEOPLE.map(p => <PersonCard key={p.id} person={p}/>)}
+        </div>
+      </section>
     </div>
   )
 }
@@ -533,6 +558,19 @@ function GroupsTab() {
           <button type="button" onClick={() => navigate('/explore-groups')} className="text-sm text-secondary hover:text-primary transition-colors font-medium">
             Explore more groups →
           </button>
+        </div>
+      </section>
+
+      <section className="bg-card rounded-2xl shadow-card p-6 flex flex-col gap-5">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold text-primary">Recommended for You</h2>
+          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: '#EDE9F8', color: '#8B9CF4' }}>
+            Suggested
+          </span>
+        </div>
+        <p className="text-xs text-muted -mt-2">Groups that match your wellness journey</p>
+        <div className="grid grid-cols-3 gap-4">
+          {RECOMMENDED_GROUPS.map(g => <GroupCard key={g.id} group={g}/>)}
         </div>
       </section>
     </div>

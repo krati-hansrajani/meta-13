@@ -21,16 +21,44 @@ const STORAGE_KEY = 'meta_journal_entries'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function loadEntries() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-  } catch {
-    return []
+function makeSampleEntries() {
+  const now = new Date()
+  function daysAgo(n, hour = 9) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - n)
+    d.setHours(hour, 0, 0, 0)
+    return d.toISOString()
   }
+  return [
+    { id: 'sample-1',  prompt: "What are three things you're grateful for today?",       feelingScore: 7, createdAt: daysAgo(0, 8),  content: "I'm grateful for my morning coffee ritual, a good conversation with a friend, and the fact that I managed to go for a short walk despite feeling tired. Small things, but they really do matter." },
+    { id: 'sample-2',  prompt: "How are you feeling emotionally right now, and why?",    feelingScore: 4, createdAt: daysAgo(1, 21), content: "Feeling a bit anxious about the upcoming week. Work has been piling up and I haven't been sleeping well. But I reminded myself that I've handled tough weeks before — and I will again." },
+    { id: 'sample-3',  prompt: "What brought you joy today, even if it was small?",      feelingScore: 8, createdAt: daysAgo(2, 19), content: "Listened to my favourite playlist on the commute. Made a really good lunch for myself. Had a quiet moment in the evening where everything just felt peaceful — rare but wonderful." },
+    { id: 'sample-4',  prompt: "Describe a challenge you faced recently and how you handled it.", feelingScore: 6, createdAt: daysAgo(3, 20), content: "Had a disagreement with a colleague. Instead of avoiding it, I asked to talk it through. We didn't fully agree but both felt heard. That felt like real growth for me." },
+    { id: 'sample-5',  prompt: "What's been weighing on your mind lately?",              feelingScore: 3, createdAt: daysAgo(4, 22), content: "Financial stress has been a recurring theme. I sat down today and made a rough budget — not perfect, but it felt good to face it rather than keep pushing it away." },
+    { id: 'sample-6',  prompt: "How did you take care of yourself today?",               feelingScore: 7, createdAt: daysAgo(5, 18), content: "Took a 20-minute break in the afternoon and did some stretching. Drank enough water. Said no to something that would have drained me. These small acts of care add up more than I realise." },
+    { id: 'sample-7',  prompt: "What's one thing you're looking forward to?",            feelingScore: 9, createdAt: daysAgo(6, 17), content: "Really looking forward to the weekend hike we planned. Being outdoors always resets my mind. Also excited about the book I started — first time in months I've been genuinely hooked by something." },
+    { id: 'sample-8',  prompt: "What's one thing you'd like to improve about yourself?", feelingScore: 5, createdAt: daysAgo(10, 20), content: "I want to be more patient — with others and with myself. I catch myself rushing through things and then feeling unsatisfied. Slowing down is something I'm actively working on." },
+    { id: 'sample-9',  prompt: "Describe a moment today where you felt proud of yourself.", feelingScore: 8, createdAt: daysAgo(15, 19), content: "Completed a project I'd been putting off for two weeks. The relief was enormous. It reminded me that starting is always the hardest part — once I'm in it, it flows." },
+    { id: 'sample-10', prompt: "What would make tomorrow a great day?",                  feelingScore: 6, createdAt: daysAgo(22, 21), content: "A good night's sleep, a healthy breakfast, and tackling the most important task first thing. Simple formula, but when I actually follow it the whole day just flows so much better." },
+  ]
 }
 
 function saveEntries(entries) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
+}
+
+function loadEntries() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
+    if (stored.length === 0) {
+      const samples = makeSampleEntries()
+      saveEntries(samples)
+      return samples
+    }
+    return stored
+  } catch {
+    return []
+  }
 }
 
 function formatDateTime(isoString) {
@@ -121,14 +149,66 @@ function EntryModal({ entry, onClose }) {
   )
 }
 
+// ── Feeling Score Scale ───────────────────────────────────────────────────────
+
+function FeelingScale({ value, onChange }) {
+  function scoreColor(n, selected) {
+    if (n <= 3) return selected
+      ? { bg: '#FEE2E2', border: '#EF4444', text: '#EF4444' }
+      : { bg: 'transparent', border: 'var(--color-border)', text: 'var(--color-muted)' }
+    if (n <= 6) return selected
+      ? { bg: '#FEF9C3', border: '#CA8A04', text: '#CA8A04' }
+      : { bg: 'transparent', border: 'var(--color-border)', text: 'var(--color-muted)' }
+    return selected
+      ? { bg: '#D1FAE5', border: '#10B981', text: '#10B981' }
+      : { bg: 'transparent', border: 'var(--color-border)', text: 'var(--color-muted)' }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-primary">How are you feeling today?</h2>
+        {value != null && (
+          <button type="button" onClick={() => onChange(null)}
+            className="text-xs text-muted hover:text-primary transition-colors">
+            Clear
+          </button>
+        )}
+      </div>
+      <div className="flex gap-1.5 justify-between">
+        {Array.from({ length: 10 }, (_, i) => i + 1).map(n => {
+          const sel = value === n
+          const c   = scoreColor(n, sel)
+          return (
+            <button
+              key={n}
+              type="button"
+              onClick={() => onChange(sel ? null : n)}
+              className="flex-1 h-10 rounded-xl text-sm font-semibold border transition-all"
+              style={{ backgroundColor: c.bg, borderColor: c.border, color: c.text }}
+            >
+              {n}
+            </button>
+          )
+        })}
+      </div>
+      <div className="flex justify-between">
+        <span className="text-[11px] text-muted">Extremely Unwell</span>
+        <span className="text-[11px] text-muted">Perfect</span>
+      </div>
+    </div>
+  )
+}
+
 // ── Daily Journal Tab ─────────────────────────────────────────────────────────
 
 function DailyJournalTab({ onSave }) {
   const [selectedPrompt, setSelectedPrompt] = useState(null)
   const [customPrompt,   setCustomPrompt]   = useState('')
-  const [mode,           setMode]           = useState(null) // 'guided' | 'custom' | 'free'
+  const [,               setMode]           = useState(null)
   const [content,        setContent]        = useState('')
   const [saved,          setSaved]          = useState(false)
+  const [feelingScore,   setFeelingScore]   = useState(null)
   const textareaRef = useRef(null)
 
   function selectGuided(prompt) {
@@ -159,13 +239,14 @@ function DailyJournalTab({ onSave }) {
 
   function handleSave() {
     if (!content.trim() || !selectedPrompt) return
-    onSave({ prompt: selectedPrompt, content: content.trim() })
+    onSave({ prompt: selectedPrompt, content: content.trim(), feelingScore })
     setSaved(true)
     setTimeout(() => {
       setSelectedPrompt(null)
       setMode(null)
       setContent('')
       setCustomPrompt('')
+      setFeelingScore(null)
       setSaved(false)
     }, 1400)
   }
@@ -186,7 +267,7 @@ function DailyJournalTab({ onSave }) {
             </div>
             <button
               type="button"
-              onClick={() => { setSelectedPrompt(null); setMode(null); setContent(''); setSaved(false) }}
+              onClick={() => { setSelectedPrompt(null); setMode(null); setContent(''); setFeelingScore(null); setSaved(false) }}
               className="text-muted hover:text-primary hover:bg-page transition-colors p-1.5 rounded-lg flex-shrink-0"
             >
               <CloseIcon />
@@ -202,10 +283,12 @@ function DailyJournalTab({ onSave }) {
             className="w-full border border-border rounded-xl px-4 py-3 text-sm text-primary placeholder:text-muted outline-none focus:border-[#8B9CF4] transition-colors resize-none leading-relaxed bg-card"
           />
 
+          <FeelingScale value={feelingScore} onChange={setFeelingScore} />
+
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
-              onClick={() => { setSelectedPrompt(null); setMode(null); setContent(''); setSaved(false) }}
+              onClick={() => { setSelectedPrompt(null); setMode(null); setContent(''); setFeelingScore(null); setSaved(false) }}
               className="text-sm font-medium text-secondary px-5 py-2.5 rounded-xl border border-border hover:bg-page transition-colors"
             >
               Cancel
@@ -341,12 +424,13 @@ export default function Journal() {
   const [activeTab, setActiveTab] = useState('Daily Journal')
   const [entries,   setEntries]   = useState(loadEntries)
 
-  function handleSave({ prompt, content }) {
+  function handleSave({ prompt, content, feelingScore }) {
     const entry = {
-      id:        crypto.randomUUID(),
+      id:           crypto.randomUUID(),
       prompt,
       content,
-      createdAt: new Date().toISOString(),
+      feelingScore: feelingScore ?? null,
+      createdAt:    new Date().toISOString(),
     }
     const next = [entry, ...entries]
     setEntries(next)
